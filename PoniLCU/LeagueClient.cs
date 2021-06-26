@@ -31,7 +31,7 @@ namespace PoniLCU
     public class LeagueClient
     {
         private static HttpClient HTTP_CLIENT;
-        private  Dictionary<string, Action<OnWebsocketEventArgs>> Subscribers = new Dictionary<string, Action<OnWebsocketEventArgs>>();
+        private Dictionary<string, List<Action<OnWebsocketEventArgs>>> Subscribers = new Dictionary<string, List<Action<OnWebsocketEventArgs>>>();
         private WebSocket socketConnection;
         private Tuple<Process, string, string> processInfo;
         private bool connected;
@@ -60,7 +60,22 @@ namespace PoniLCU
                     ServerCertificateCustomValidationCallback = (a, b, c, d) => true
                 });
             }
-            Task.Delay(1000).ContinueWith(e => TryConnectOrRetry());
+            Task.Delay(2000).ContinueWith(e => TryConnectOrRetry());
+            var trytimes = 0;
+            while (!IsConnected)
+            {
+                if (trytimes!=5)
+                {
+                    trytimes ++;
+                TryConnectOrRetry();
+
+                }
+                else
+                {
+                    Console.WriteLine("Connection timed out ");
+                    break; 
+                }
+            }
         }
         public Task<HttpResponseMessage> Request(string method, string url, object body)
         {
@@ -147,15 +162,39 @@ namespace PoniLCU
             
             if (!Subscribers.ContainsKey(URI))
             {
-            Subscribers.Add(URI,args);
+                Subscribers.Add(URI, new List<Action<OnWebsocketEventArgs>>() { args});
+            }
+            else
+            {
+
+                Subscribers[URI].Add(args);
             }
         }
-        public void Unsubscribe(string URI)
+        public void Unsubscribe(string URI,Action<OnWebsocketEventArgs> action)
         {
             if (Subscribers.ContainsKey(URI))
             {
-            Subscribers.Remove(URI);
-            socketConnection.Send("[6,\"OnJsonApiEvent\"]");
+                if (Subscribers[URI].Count == 1)
+                {
+                    Subscribers.Remove(URI);
+                }
+                else if (Subscribers[URI].Count > 1)
+                {
+                    foreach (var item in Subscribers[URI].ToArray())
+                    {
+                        if (item == action)
+                        {
+                            var index = Subscribers[URI].IndexOf(action);
+                           Subscribers[URI].RemoveAt(index);
+
+                        }
+                    }
+                }
+                else
+                {
+                    return;
+                }
+                
 
             }
         }       
@@ -196,12 +235,17 @@ namespace PoniLCU
             });
             if (Subscribers.ContainsKey((string)ev["uri"]))
             {
-                Subscribers[(string)ev["uri"]](new OnWebsocketEventArgs()
+                foreach (var item in Subscribers[(string)ev["uri"]])
                 {
-                    Path = ev["uri"],
-                    Type = ev["eventType"],
-                    Data = ev["eventType"] == "Delete" ? null : ev["data"]
-                }) ;
+                    item(new OnWebsocketEventArgs()
+                    {
+                        Path = ev["uri"],
+                        Type = ev["eventType"],
+                        Data = ev["eventType"] == "Delete" ? null : ev["data"]
+                    });
+
+                }
+              
             }
 
         }

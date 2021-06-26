@@ -5,6 +5,8 @@
     <Authors>Ponita0</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>PoniLCU</PackageId>
+    <Version>1.0.1</Version>
+    <Description>League of legends LCU API Liberary</Description>
   </PropertyGroup>
 
   <ItemGroup>
