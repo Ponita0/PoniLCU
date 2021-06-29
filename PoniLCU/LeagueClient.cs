@@ -72,7 +72,7 @@ namespace PoniLCU
                 }
                 else
                 {
-                    Console.WriteLine("Connection timed out ");
+                    Debug.WriteLine("Connection timed out ");
                     break; 
                 }
             }
