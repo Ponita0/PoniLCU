@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Authors>Ponita0</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>PoniLCU</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Description>League of legends LCU API Liberary</Description>
   </PropertyGroup>
 
@@ -14,12 +14,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="RestSharp" Version="106.11.7" />
     <PackageReference Include="System.Management" Version="5.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="websocket-sharp-customheaders">
-      <HintPath>..\..\testCopyPasta\testCopyPasta\bin\Debug\websocket-sharp-customheaders.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+    <PackageReference Include="websocket-sharp-customheaders" Version="1.0.2.31869" />
+  </ItemGroup>  
 
 </Project>
