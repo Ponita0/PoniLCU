@@ -6,7 +6,7 @@
 # Introduction
 PoniLCU is a library to communicate with the League of Legends Client API. It gives an easy way to send requests as well as subscribe to websocket events.
 
-Don't know about the League of Legends Client API? Learn more from [Hextech Docs](https://www.hextechdocs.dev/lol/lcuapi/6.getting-started-with-the-lcu-api). 
+Don't know about the League of Legends Client API? Learn more from [Hextech Docs](https://hextechdocs.dev/getting-started-with-the-lcu-api/). 
 
 # Installation 
 
