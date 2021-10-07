@@ -33,10 +33,7 @@ namespace PoniLCU
     public class LeagueClient
     {
         private static HttpClient HTTP_CLIENT;
-
-        private Dictionary<string, List<Action<OnWebsocketEventArgs>>> Subscribers =
-            new Dictionary<string, List<Action<OnWebsocketEventArgs>>>();
-
+        private Dictionary<string, List<Action<OnWebsocketEventArgs>>> Subscribers = new Dictionary<string, List<Action<OnWebsocketEventArgs>>>();
         private Tuple<string, string> processInfo;
         private bool connected;
         public event Action OnConnected;
@@ -57,8 +54,7 @@ namespace PoniLCU
             }
             catch
             {
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 |
-                                                       SecurityProtocolType.Tls;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
                 HTTP_CLIENT = new HttpClient(new HttpClientHandler()
                 {
@@ -146,12 +142,10 @@ namespace PoniLCU
                 if (status == null) return;
 
                 var byteArray = Encoding.ASCII.GetBytes("riot:" + status.Item1);
-                HTTP_CLIENT.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+                HTTP_CLIENT.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
 
                 try
                 {
-                    
                     var testEndpoint = "lol-summoner/v1/current-summoner";
                     var test = await HTTP_CLIENT.GetAsync("wss://127.0.0.1:" + status.Item2 + "/" + testEndpoint);
                     Console.WriteLine(await test.Content.ReadAsStringAsync());
