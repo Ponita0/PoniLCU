@@ -148,7 +148,6 @@ namespace PoniLCU
                 {
                     var testEndpoint = "lol-summoner/v1/current-summoner";
                     var test = await HTTP_CLIENT.GetAsync("wss://127.0.0.1:" + status.Item2 + "/" + testEndpoint);
-                    Console.WriteLine(await test.Content.ReadAsStringAsync());
                 }
                 catch (Exception e)
                 {
@@ -343,10 +342,7 @@ namespace PoniLCU
 
         public DebugLogger(string fileName)
         {
-            writer = new StreamWriter(
-                Path.Combine(
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "testCopyPasta"),
-                    fileName), true);
+            writer = new StreamWriter( Path.Combine( Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "testCopyPasta"), fileName), true);
             writer.AutoFlush = true;
             writer.WriteLine($"\n\n\n --- {DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} --- ");
             writer.WriteLine($"Started logging to {fileName}...");
