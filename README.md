@@ -29,10 +29,26 @@ LeagueClient leagueClient = new LeagueClient();
          }
  ```
 # Request Example
+
+## get request
+```cs
+  var currentSummoner = await leagueClient.Request("get", "/lol-summoner/v1/current-summoner", null).Result.Content.ReadAsStringAsync();
+  MessageBox.Show(currentSummoner);
+```
+![get request using](https://i.imgur.com/9v5azuK.gif)
+### if not going to use async .... then add .Result to the end of the line
+like this
+```cs
+    var currentSummoner =  leagueClient.Request("get", "/lol-summoner/v1/current-summoner", null).Result.Content.ReadAsStringAsync().Result;
+    MessageBox.Show(currentSummoner);
+```
+
+## put request
 ```cs
 string body = "{\"profileIconId\": "+23+"}";
 leagueClient.Request("put", "/lol-summoner/v1/current-summoner/icon", body);
 ```
+
 ![Usage Request Run](https://i.imgur.com/EZHsl1f.gif)
 
 # Websocket Events Example
