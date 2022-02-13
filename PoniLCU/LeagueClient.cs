@@ -286,8 +286,40 @@ namespace PoniLCU
                         catch (Exception e)
                         {
                             DebugLogger.Global.WriteError($"Error while trying to get the status for LeagueClientUx: {e.ToString()}\n\n(CommandLine = {commandLine})");
-                        }
+                        }                      
                     }
+                    
+                    try
+                    {
+                        if (p.MainModule == null)
+                            throw new Exception("The LeagueClientUx process doesn't have any main modul.");
+
+                        var processDirectory = Path.GetDirectoryName(p.MainModule.FileName);
+
+                        if (processDirectory == null)
+                            throw new Exception("Unable to get the directory name for the LeagueClientUx process.");
+                        
+                        string lockfilePath = Path.Combine(processDirectory, "lockfile");
+                        
+                        string lockfile;
+                        using (var stream = File.Open(lockfilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        using (var reader = new StreamReader(stream))
+                        {
+                            lockfile = reader.ReadToEnd();
+                        }
+                        
+                        var splitContent = content.Split(':');
+                        return new Tuple<Process, string, string>
+                        (
+                            p,
+                            splitContent[3], // authToken
+                            splitContent[2] // port
+                        );
+                    }
+                    catch (Exception e)
+                    {
+                        DebugLogger.Global.WriteError($"Error while trying to get the lockfile for LeagueClientUx: {e.ToString()}\n\n(LockfilePath = {lockfilePath})");
+                    }  
                 }
 
                 return null;
