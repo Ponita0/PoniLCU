@@ -292,7 +292,7 @@ namespace PoniLCU
                     try
                     {
                         if (p.MainModule == null)
-                            throw new Exception("The LeagueClientUx process doesn't have any main modul.");
+                            throw new Exception("The LeagueClientUx process doesn't have any main module.");
 
                         var processDirectory = Path.GetDirectoryName(p.MainModule.FileName);
 
@@ -318,7 +318,7 @@ namespace PoniLCU
                     }
                     catch (Exception e)
                     {
-                        DebugLogger.Global.WriteError($"Error while trying to get the lockfile for LeagueClientUx: {e.ToString()}\n\n(LockfilePath = {lockfilePath})");
+                        DebugLogger.Global.WriteError($"Error while trying to get the lockfile for LeagueClientUx: {e.ToString()}");
                     }  
                 }
 
