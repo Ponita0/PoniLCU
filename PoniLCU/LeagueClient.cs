@@ -308,7 +308,7 @@ namespace PoniLCU
                             lockfile = reader.ReadToEnd();
                         }
                         
-                        var splitContent = content.Split(':');
+                        var splitContent = lockfile.Split(':');
                         return new Tuple<Process, string, string>
                         (
                             p,
