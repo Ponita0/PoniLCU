@@ -7,6 +7,15 @@ PoniLCU is a library to communicate with the League of Legends Client API. It gi
 
 Don't know about the League of Legends Client API? Learn more from [Hextech Docs](https://hextechdocs.dev/getting-started-with-the-lcu-api/). 
 
+# Supported platforms
+Platform  | Version
+------------- | -------------
+.NET Framework | 4.6.1 , 4.6.2, 4.7, 4.7.1, 4.7.2, 4.8
+.NET Core  | 2.0, 2.1, 2.2, 3.0, 3.1
+.NET  | 5.0, 6.0
+Universal Windows Platform | 	10.0.16299, TBD
+
+
 # Installation 
 
 Just run
