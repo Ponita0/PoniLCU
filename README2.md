@@ -1,4 +1,3 @@
-
 # Ponita0 - PoniLCU
 
 ### A C# League of Legends LCU library
@@ -10,30 +9,29 @@ Don't know about the League of Legends Client API? Learn more from [Hextech Docs
 
 # Installation 
 
-just run
+Just run
 `Install-Package PoniLCU`
 in the Package Manager Console
 
 You can find a NuGet package here https://www.nuget.org/packages/PoniLCU/  
 
-# How to use it ?
-well , let me teach you how to use it 
+# The Basics
 
 Make an instance of LeagueClient
 ```cs
-  //At top of you code 
-  //using PoniLCU;
-  //using static PoniLCU.LeagueClient; 
+//At top of your code 
+//using PoniLCU;
+//using static PoniLCU.LeagueClient; 
   
   
-//put this in the top of your code and make it public to access it from anywhere
+//Put this in the top of your code and make it public to access it from anywhere
 LeagueClient leagueClient = new LeagueClient(credentials.cmd);
 
 //You can do either credentials.cmd or credentials.lockfile
-//it doesnt really matter
+//It doesn't really matter
  ```
  
- like this : 
+Like this:
  
  ```cs
 using System;
@@ -56,25 +54,23 @@ namespace MyApp
  ```
 # Requests Examples
 
-## get request
+## GET request
 
-*I recommaned you use Async/await*
+*I recommend you use Async/await*
 
 ```cs
-  var data = await leagueClient.Request(requestMethod.get, "/lol-summoner/v1/current-summoner");
-  Console.WriteLine(data);
+var data = await leagueClient.Request(requestMethod.get, "/lol-summoner/v1/current-summoner");
+Console.WriteLine(data);
 ```
 ![get request using](https://i.imgur.com/fTWw1Gm.gif)
 
-### if not going to use async .... then add .Result to the end of the line
-like this
-
+### If you're not going to use async, add .Result to the end of the line
 
 ```cs
-    var data = leagueClient.Request(requestMethod.get, "/lol-summoner/v1/current-summoner").Result;
-    Console.WriteLine(data);
+var data = leagueClient.Request(requestMethod.get, "/lol-summoner/v1/current-summoner").Result;
+Console.WriteLine(data);
 ```
-and as a tip information i will teach you how to get one specific data from the whole json ;D
+An example on how to get specific information from the json:
 
 ```cs
 var data = await leagueClient.Request(requestMethod.get, "/lol-summoner/v1/current-summoner");
@@ -86,46 +82,45 @@ Console.WriteLine(DataButJsonDeserialized["displayName"]);
 //The console will output your name only
 ```
 
-## put request
+## PUT request
 
- now .. for the body , you have two options
-* define the body string manually
-* let C# do that for us (with help of Newtonsoft.Json )
-  
+For the body, you have two options:
+* Define the body string manually
+* Let C# do that for us (with help of Newtonsoft.Json)
+
+Both of these solutions will work, it is preference on how you would like to define it.
   - - - -
-  The First Solution : 
+ Using a manual body string: 
 ```cs
 string body = "{\"profileIconId\": " + 23 + "}";
 await leagueClient.Request(requestMethod.put, "/lol-summoner/v1/current-summoner/icon", body);        
 ```
 
-  - - - -
-  The second solution : 
- ```cs
- var body = Newtonsoft.Json.JsonConvert.SerializeObject( new
-            {
-                profileIconId = 23
-            });
-            await leagueClient.Request(requestMethod.put, "/lol-summoner/v1/current-summoner/icon", body);
+ - - - -
+Using Newtonsoft Json:
+```cs
+var body = Newtonsoft.Json.JsonConvert.SerializeObject( new
+	{
+		profileIconId = 23
+	});
+await leagueClient.Request(requestMethod.put, "/lol-summoner/v1/current-summoner/icon", body);
  ```
  
-![Put Request Example](https://i.imgur.com/uT9lNr5.gif)
-
- ### they both will work 
+![PUT Request Example](https://i.imgur.com/uT9lNr5.gif)
 
 
 # Websocket Events Example
-With PoniLCU you can subscribe to or unsubscribe from LCU events using the following codes :
+With PoniLCU you can subscribe to or unsubscribe from LCU events using the following code:
 ```cs
 // Subscribe to event
 leagueClient.Subscribe("/lol-gameflow/v1/gameflow-phase", GameFlowPhase);
 
-// Subscribe to event
+// Unsubscribe from event
 leagueClient.Unsubscribe("/lol-gameflow/v1/gameflow-phase", GameFlowPhase);
 
- private void GameFlowPhase(OnWebsocketEventArgs obj)
-  {
-            Console.WriteLine(obj.Data);
-  }
+private void GameFlowPhase(OnWebsocketEventArgs obj)
+{
+	Console.WriteLine(obj.Data);
+}
   ```
-![Usage Request Run](https://i.imgur.com/nuM34lT.gif)
+![Websocket Request Example](https://i.imgur.com/nuM34lT.gif)
