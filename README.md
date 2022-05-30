@@ -12,7 +12,7 @@ Platform  | Version
 ------------- | -------------
 .NET Framework | 4.6.1 , 4.6.2, 4.7, 4.7.1, 4.7.2, 4.8
 .NET Core  | 2.0, 2.1, 2.2, 3.0, 3.1
-.NET  | 5.0, 6.0
+.NET  | 5.0, 6.0 [#16](https://github.com/Ponita0/PoniLCU/issues/16)
 Universal Windows Platform | 	10.0.16299, TBD
 
 
