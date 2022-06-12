@@ -34,7 +34,8 @@ namespace PoniLCU
         public enum credentials
         {
             lockfile,
-            cmd
+            cmd,
+            uxLogs
         }
         public enum requestMethod
         {
@@ -61,15 +62,19 @@ namespace PoniLCU
         public bool IsConnected => connected;
 
         static credentials _Method;
+        static string _ClientRoot;  // Path of "League of Ledgends.exe" or "英雄联盟.exe"
 
         private static Regex AUTH_TOKEN_REGEX = new Regex("\"--remoting-auth-token=(.+?)\"");
 
         private static Regex PORT_REGEX = new Regex("\"--app-port=(\\d+?)\"");
+
+        private static Regex LOGS_REGEX = new Regex("--remoting-auth-token=([a-zA-Z0-9_]*)\\r\\n\\t--app-port=([0-9]*)");
         #endregion
 
-        public LeagueClient(credentials method)
+        public LeagueClient(credentials method, string clientRoot = "")
         {
             _Method = method;
+            _ClientRoot = clientRoot;
             //we initialize the http client
             try
             {
@@ -329,69 +334,103 @@ namespace PoniLCU
 
         private Tuple<Process, string, string> GetLeagueStatus()
         {
-            foreach (var p in Process.GetProcessesByName("LeagueClientUx"))
+            if (_Method == credentials.uxLogs)
             {
-                if (LeagueClient._Method == LeagueClient.credentials.cmd)
-                {
-                    using (var mos = new ManagementObjectSearcher("SELECT CommandLine FROM Win32_Process WHERE ProcessId = " + p.Id.ToString()))
-                    using (var moc = mos.Get())
-                    {
-                        var commandLine = (string)moc.OfType<ManagementObject>().First()["CommandLine"];
+                DirectoryInfo dirInfo;
+                FileInfo[] fileInfo;
+                FileInfo latestUxLog;
+                string uxLogsContent;
 
+                dirInfo = new DirectoryInfo(_ClientRoot);
+                fileInfo = dirInfo.GetFiles("LeagueClient.exe", SearchOption.TopDirectoryOnly);
+
+                // 1st： Riot server, 2nd: Tencent server
+                string uxLogsFolder = fileInfo.Length != 0 ? Path.Combine(_ClientRoot, "Logs\\LeagueClient Logs") : Path.Combine(_ClientRoot, "Game\\Logs\\LeagueClient Logs");
+
+                dirInfo = new DirectoryInfo(uxLogsFolder);
+                fileInfo = dirInfo.GetFiles("*LeagueClientUx.log", SearchOption.TopDirectoryOnly);
+                latestUxLog = fileInfo.Last();
+
+                using (var stream = File.Open(latestUxLog.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var reader = new StreamReader(stream))
+                {
+                    uxLogsContent = reader.ReadToEnd();
+                }
+
+                var match = LOGS_REGEX.Match(uxLogsContent);
+                return new Tuple<Process, string, string>
+                    (
+                        null,
+                        match.Groups[1].Value,
+                        match.Groups[2].Value
+                    );
+            }
+            else
+            {
+                foreach (var p in Process.GetProcessesByName("LeagueClientUx"))
+                {
+                    if (LeagueClient._Method == LeagueClient.credentials.cmd)
+                    {
+                        using (var mos = new ManagementObjectSearcher("SELECT CommandLine FROM Win32_Process WHERE ProcessId = " + p.Id.ToString()))
+                        using (var moc = mos.Get())
+                        {
+                            var commandLine = (string)moc.OfType<ManagementObject>().First()["CommandLine"];
+
+                            try
+                            {
+                                var authToken = AUTH_TOKEN_REGEX.Match(commandLine).Groups[1].Value;
+                                var port = PORT_REGEX.Match(commandLine).Groups[1].Value;
+                                return new Tuple<Process, string, string>
+                                (
+                                    p,
+                                    authToken,
+                                    port
+                                );
+                            }
+                            catch (Exception e)
+                            {
+                                throw new InvalidOperationException($"Error while trying to get the status for LeagueClientUx: {e.ToString()}\n\n(CommandLine = {commandLine})");
+
+                            }
+                        }
+                    }
+                    else if (_Method == LeagueClient.credentials.lockfile)
+                    {
                         try
                         {
-                            var authToken = AUTH_TOKEN_REGEX.Match(commandLine).Groups[1].Value;
-                            var port = PORT_REGEX.Match(commandLine).Groups[1].Value;
+                            if (p.MainModule == null)
+                                throw new Exception("The LeagueClientUx process doesn't have any main module.");
+
+                            var processDirectory = Path.GetDirectoryName(p.MainModule.FileName);
+
+                            if (processDirectory == null)
+                                throw new Exception("Unable to get the directory name for the LeagueClientUx process.");
+
+                            string lockfilePath = Path.Combine(processDirectory, "lockfile");
+
+                            string lockfile;
+                            using (var stream = File.Open(lockfilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                            using (var reader = new StreamReader(stream))
+                            {
+                                lockfile = reader.ReadToEnd();
+                            }
+
+                            var splitContent = lockfile.Split(':');
                             return new Tuple<Process, string, string>
                             (
                                 p,
-                                authToken,
-                                port
+                                splitContent[3],
+                                splitContent[2]
                             );
                         }
                         catch (Exception e)
                         {
-                            throw new InvalidOperationException($"Error while trying to get the status for LeagueClientUx: {e.ToString()}\n\n(CommandLine = {commandLine})");
-
+                            throw new InvalidOperationException($"Error while trying to get the status for LeagueClientUx: {e.ToString()})");
                         }
                     }
                 }
-                else if (_Method == LeagueClient.credentials.lockfile)
-                {
-                    try
-                    {
-                        if (p.MainModule == null)
-                            throw new Exception("The LeagueClientUx process doesn't have any main module.");
-
-                        var processDirectory = Path.GetDirectoryName(p.MainModule.FileName);
-
-                        if (processDirectory == null)
-                            throw new Exception("Unable to get the directory name for the LeagueClientUx process.");
-
-                        string lockfilePath = Path.Combine(processDirectory, "lockfile");
-
-                        string lockfile;
-                        using (var stream = File.Open(lockfilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                        using (var reader = new StreamReader(stream))
-                        {
-                            lockfile = reader.ReadToEnd();
-                        }
-
-                        var splitContent = lockfile.Split(':');
-                        return new Tuple<Process, string, string>
-                        (
-                            p,
-                            splitContent[3],
-                            splitContent[2]
-                        );
-                    }
-                    catch (Exception e)
-                    {
-                        throw new InvalidOperationException($"Error while trying to get the status for LeagueClientUx: {e.ToString()})");
-                    }
-                }
+                return null;
             }
-            return null;
         }
     }
 }
